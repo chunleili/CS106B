@@ -1,0 +1,6 @@
+build-*
+*.zip
+*.o
+*.idx
+*.app
+.DS_Store
