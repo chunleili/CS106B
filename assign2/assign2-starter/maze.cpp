@@ -22,21 +22,73 @@ using namespace std;
  */
 Set<GridLocation> generateValidMoves(Grid<bool>& maze, GridLocation cur) {
     Set<GridLocation> neighbors;
-    /* TODO: Fill in the remainder of this function. */
+    GridLocation s(cur.row-1, cur.col),
+            n(cur.row+1, cur.col),
+            w(cur.row, cur.col-1),
+            e(cur.row, cur.col+1);
+    if(maze.inBounds(s) && maze[s]==true) //第一个条件保障不超过迷宫边界。第二个条件保证不越过墙壁。
+        neighbors.add(s);
+    if(maze.inBounds(n) && maze[n]==true)
+        neighbors.add(n);
+    if(maze.inBounds(w) && maze[w]==true)
+        neighbors.add(w);
+    if(maze.inBounds(e) && maze[e]==true)
+        neighbors.add(e);
     return neighbors;
 }
 
 /* TODO: Replace this comment with a descriptive function
  * header comment.
  */
-void validatePath(Grid<bool>& maze, Stack<GridLocation> path) {
+void validatePath(Grid<bool>& maze, const Stack<GridLocation> path) {
+    if(path.isEmpty())
+        return;
     GridLocation mazeExit = {maze.numRows()-1,  maze.numCols()-1};
 
     if (path.peek() != mazeExit) {
         error("Path does not end at maze exit");
     }
-    /* TODO: Fill in the remainder of this function. */
 
+    /* TODO: Fill in the remainder of this function. */
+    //1.起点必须在左上角
+    GridLocation LeftUpper={0,0};
+    //初始化一个path_tmp，把path_tmp排空直到最后一个元素，就得到了栈底
+    Stack<GridLocation> path_tmp=path;
+    while(path_tmp.size() != 1)
+        path_tmp.pop();
+    auto start = path_tmp.pop();
+    if(start!=LeftUpper)
+        error("起点必须在左上角!");
+    //2.终点必须在右下角
+        //已经被上面的代码写好了
+
+    //3. 每一步移动都必须合规
+    Stack<GridLocation> path_tmp2(path);
+    while(!path_tmp2.isEmpty())
+    {
+        GridLocation cur = path_tmp2.pop();
+        if(path_tmp2.isEmpty())
+            break;
+        GridLocation next = path_tmp2.peek();
+        Set<GridLocation> const valMov =  generateValidMoves(maze, cur);
+        if(!valMov.contains(next))
+        {
+            error("移动不合规！");
+        }
+    }
+
+    //4.同一个位置不能走两次
+    Set<GridLocation> unique;
+    Stack<GridLocation> path_tmp3=path;
+    while(!path_tmp3.isEmpty())
+    {
+        auto x = path_tmp3.pop();
+        if(unique.contains(x))
+        {
+            error("同一个位置不能走两次!");
+        }
+        unique.add(x);
+    }
     /* If you find a problem with the path, call error() to report it.
      * If the path is a valid solution, then this function should run to completion
      * without throwing any errors.
@@ -50,6 +102,7 @@ Stack<GridLocation> solveMaze(Grid<bool>& maze) {
     MazeGraphics::drawGrid(maze);
     Stack<GridLocation> path;
     /* TODO: Fill in the remainder of this function. */
+    MazeGraphics::highlightPath(path,"yellow",1000);
     return path;
 }
 
@@ -110,6 +163,17 @@ void readSolutionFile(string filename, Stack<GridLocation>& soln) {
 
     if (!(in >> soln)) {// if not successfully read
         error("Maze solution did not have the correct format.");
+    }
+}
+
+
+
+void solutionToString(Stack<GridLocation> mySoln, Stack<string> & mySolnString)
+{
+    while(!mySoln.isEmpty())
+    {
+        auto loc = mySoln.pop();
+        mySolnString.push(loc.toString());
     }
 }
 
@@ -203,4 +267,81 @@ PROVIDED_TEST("solveMaze on file 21x23") {
     EXPECT_NO_ERROR(validatePath(maze, soln));
 }
 
+
+
+
+
+//-------------------------------------------
 // TODO: add your test cases here
+STUDENT_TEST("generateValidMoves 更多测试：正常")
+{
+    Grid<bool> maze = {{false, true, true},
+                       {true, true, true},
+                       {true, true, true}};
+    GridLocation loc = {0, 1};
+    Set<GridLocation> expected = {{1,1}, {0,2}};
+    EXPECT_EQUAL(generateValidMoves(maze, loc), expected);
+}
+
+STUDENT_TEST("generateValidMoves 更多测试2:负数")
+{
+    Grid<bool> maze = {{false, true, true},
+                       {true, true, true},
+                       {true, true, true}};
+    GridLocation loc = {0, -1};
+    (generateValidMoves(maze, loc));
+}
+STUDENT_TEST("generateValidMoves 更多测试3:骑墙")
+{
+    Grid<bool> maze = {{false, true, true},
+                       {true, true, true},
+                       {true, true, true}};
+    GridLocation loc = {0, 0};
+    Set<GridLocation> expected = {{1,1}, {0,2}};
+    (generateValidMoves(maze, loc));
+}
+
+
+STUDENT_TEST("validatePath 更多测试1: 17x37")
+{
+    Grid<bool> maze;
+    Stack<GridLocation> soln;
+    readMazeFile("res/17x37.maze", maze);
+    readSolutionFile("res/17x37.soln", soln);
+
+    EXPECT_NO_ERROR(validatePath(maze, soln));
+}
+
+
+PROVIDED_TEST("validatePath: 期待报错") {
+    Grid<bool> maze = {{true, false},
+                       {true, true}};
+    Stack<GridLocation> not_end_at_exit = { {1, 0}, {0, 0} };
+    Stack<GridLocation> not_begin_at_entry = { {1, 0}, {1, 1} };
+    Stack<GridLocation> go_through_wall = { {0 ,0}, {0, 1}, {1, 1} };
+    Stack<GridLocation> teleport = { {0 ,0}, {1, 1} };
+    Stack<GridLocation> revisit = { {0 ,0}, {1, 0}, {0, 0}, {1, 0}, {1, 1} };
+
+    EXPECT_ERROR(validatePath(maze, not_end_at_exit));
+    EXPECT_ERROR(validatePath(maze, not_begin_at_entry));
+    EXPECT_ERROR(validatePath(maze, go_through_wall));
+    EXPECT_ERROR(validatePath(maze, teleport));
+    EXPECT_ERROR(validatePath(maze, revisit));
+}
+
+
+PROVIDED_TEST("迷宫求解 on file 5x7") {
+    Grid<bool> maze;
+    Stack<GridLocation> soln;
+    readMazeFile("res/5x7.maze", maze);
+    readSolutionFile("res/5x7.soln", soln);
+    Stack<GridLocation> mySoln = solveMaze(maze);
+    Stack<string> mySolnString;
+    while(!mySoln.isEmpty())
+    {
+        auto loc = mySoln.pop();
+        mySolnString.push(loc.toString());
+    }
+
+    EXPECT_EQUAL(mySoln,soln);
+}

@@ -20,7 +20,7 @@ A4. move the pop into the if(!s.empty())
 Maze
 -------
 Q5. In lecture, Cynthia noted the convention is to pass large data structures by reference for reasons of efficiency. Why then do you think `validatePath` passes `path` by value instead of by reference?
-A5. TODO
+A5. 因为path有可能被改动，但是又不想让改动影响原始数据。
 
 Q6. After you have written your tests, describe your testing strategy to determine that your `validatePath` works as intended.
 A6. TODO
