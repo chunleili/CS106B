@@ -8,25 +8,40 @@ Before submitting this file, make sure that there are no more TODO
 placeholders remaining in the file (and remove this comment too).
 
 Q1. Roughly how long did it take your computer to do the search? How many perfect numbers were found and what were they?
-A1. TODO
+A1. About 1s. Four are found: 6, 28, 496, 8128.
 
 Q2. Record the timing results for `findPerfects` that you observed into a table.
-A2. TODO
+A2.
+n : time
+10000 : 0.086s
+20000 : 0.27s
+40000 : 1.036s
+80000 : 4.109s
+160000: 16.351s
+320000: 67.68s
 
 Q3. Does it take the same amount of work to compute `isPerfect` on the number 10 as it does on the number 1000? Why or why not? Does it take the same amount of work for `findPerfects` to search the range of numbers from 1-1000 as it does to search the numbers from 1000-2000? Why or why not?
-A3. TODO
+A3. Not the same amount work for 10 and 100. Since the divisorSum will search from 0 to n every time.
+Also, not the same amount of work for the 1-1000 and 1000-2000. Since the starting point matters. It will always search from 1. So 1000-2000 is obviously requires for loops.
 
 Q4. Extrapolate from the data you gathered and make a prediction: how long will it take `findPerfects` to reach the fifth perfect number?
-A4. TODO
+A4. Hours.
 
 Q5. Do any of the tests still pass even with this broken function? Why or why not?
-A5. TODO
+A5. Some passed, such as test3 and test5 and test6 in provided tests. Others failed.
 
 Q6. Describe the testing strategy you used for your test cases to confirm `smarterSum` is working correctly.
-A6. TODO
+A6. Just search to sqrt(n) instead of n. Because the divisor under sqrt(n) definitely has a twin n/divisor, which is a divisor as well.
+But be cautious that when divisor == n/divisor, only add one of them because they are same. And the sqrt(n) should also be searched(in the case of 5*5=25, 5=sqrt(25) is also a divisor).
+Be cautious about the 1 as well.
 
 Q7. Record your timing results for `findPerfectsSmarter` into a table.
-A7. TODO
+A7.
+10000:0.02s
+20000:0.025s
+40000:0.035s
+80000:0.058s
+160000:0.109s
 
 Q8. Make a prediction: how long will `findPerfectsSmarter` take to reach the fifth perfect number?
 A8. TODO
